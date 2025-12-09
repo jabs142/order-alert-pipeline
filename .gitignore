@@ -1,0 +1,16 @@
+# Credentials
+credentials/
+*.json
+!test-data/*.json
+.env
+
+# IguanaX local files
+.iguana/
+
+# System files
+.DS_Store
+*.log
+
+# Python
+__pycache__/
+*.pyc

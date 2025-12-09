@@ -1,0 +1,8 @@
+{
+  "order_id": "10002",
+  "customer": {
+    "name": "Jane Doe",
+    "phone": "+15559876543"
+  },
+  "total": 350.00
+}

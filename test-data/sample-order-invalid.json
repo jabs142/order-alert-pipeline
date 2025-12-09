@@ -1,0 +1,7 @@
+{
+  "order_id": "10003",
+  "customer": {
+    "name": "Invalid Order"
+  },
+  "total": "not-a-number"
+}

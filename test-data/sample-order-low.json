@@ -1,0 +1,8 @@
+{
+  "order_id": "10001",
+  "customer": {
+    "name": "John Smith",
+    "phone": "+15551234567"
+  },
+  "total": 150.00
+}
