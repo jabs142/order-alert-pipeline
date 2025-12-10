@@ -5,7 +5,7 @@
 **Core Requirements:**
 - Ingest incoming JSON messages via HTTP
 - Process and filter the data
-- Send notifications via Twilio (SMS alerts) OR Google Sheets (data logging)
+- Send notifications via Twilio (SMS alerts) AND Google Sheets (data logging)
 
 ---
 
@@ -108,7 +108,7 @@ Credentials are like an ID card, but you still need to exchange them for an acce
 **Q: Why build JWT from scratch instead of using a library?**
 
 - IguanaX doesn't support popular JWT libraries (lua-resty-jwt requires OpenResty, luajwt needs C dependencies)
-- Building from scratch demonstrates deep understanding of OAuth 2.0 flow
+<Insert picture here>
 
 <br>
 
@@ -116,6 +116,58 @@ Credentials are like an ID card, but you still need to exchange them for an acce
 
 **Learning Path:**
 - Read Twilio SMS API Docs
+- Understand HTTP Basic Authentication
+- Learn about form-encoded requests vs JSON
+
+<br>
+
+**Q: How is Twilio different from Google Sheets authentication?**
+
+<Picture>
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   "Hi Jane! Order #123 ($50) is ready."                     │
+└─────────────────────────────────────────────────────────────┘
+                           │
+         ┌─────────────────┴─────────────────┐
+         │                                   │
+    ┌────▼────┐                         ┌────▼────┐
+    │  JSON   │                         │  FORM   │
+    │ (Auto)  │                         │ (Manual)│
+    └────┬────┘                         └────┬────┘
+         │                                   │
+         │ json.serialize()                  │ urlEncode()
+         │ does it for you                   │ you must do it
+         │                                   │
+         ▼                                   ▼
+    {"message":                         Body=Hi+Jane%21+Order+
+     "Hi Jane!                          %23123+%28%2450%29+
+      Order #123                        is+ready.
+      ($50) is
+      ready."}
+         │                                   │
+         │                                   │
+         ▼                                   ▼
+    Google Sheets API                   Twilio API
+```
+
+<br>
+
+**Q: Why does Twilio use URL encoding?**
+
+Twilio API is older and expects form-encoded data (like HTML form submission), so special characters must be URL-encoded:
+- Space → `+` or `%20`
+- `#` → `%23`
+- `&` → `%26`
+
+This is different from Google Sheets which uses JSON (automatically handles encoding).
+
+Google Sheets API is modern and uses JSON because:
+JSON handles special characters automatically - you don't need to encode manually
+JSON is easier to read and write
+JSON can represent complex nested data (like lists within lists)
 
 <br>
 
@@ -143,8 +195,8 @@ External System
 IguanaX Component (main.lua)
     ├─→ utils.lua: Load credentials
     ├─→ google_auth.lua: Get OAuth token
-    ├─→ google_sheets.lua: Log to spreadsheet
-    └─→ twilio_sms.lua: Send SMS ⏳
+    ├─→ google_sheets.lua: Log to spreadsheet ✅
+    └─→ twilio_sms.lua: Send SMS ✅
 ```
 
 <br>
@@ -159,7 +211,7 @@ IguanaX Component (main.lua)
 2. Validates the JSON order data (required fields, data types)
 3. Authenticates with Google via OAuth (calls `google_auth.getAccessToken()`)
 4. Logs all orders to Google Sheets (calls `google_sheets.appendRow()` with retry logic)
-5. Identifies high-value orders (>$300) for SMS alerts (Twilio integration pending)
+5. Identifies high-value orders (>$300) and sends SMS alerts via Twilio (calls `twilio_sms.sendSMS()` with retry logic)
 6. Responds to the client with success/error status
 
 
@@ -295,10 +347,86 @@ For healthcare deployment, would add:
 
 <br>
 
+---
+
+## 🧪 Testing
+
+### Test 1: Low-Value Order (Google Sheets Only)
+
+**Test Case:** Order under $300 - should log to Sheets but not send SMS
+
+```bash
+curl -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d @test-data/sample-order-low.json
+```
+
+**Expected Results:**
+- ✅ Response: `{"status": "success", "order_id": "10001"}`
+- ✅ Google Sheets: New row added with order details
+- ✅ IguanaX Logs: "Order logged to Google Sheets"
+- ❌ No SMS sent (order total is $150)
+
+<br>
+
+### Test 2: High-Value Order (Google Sheets + SMS)
+
+**Test Case:** Order over $300 - should log to Sheets AND send SMS
+
+```bash
+curl -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d @test-data/sample-order-high.json
+```
+
+**Expected Results:**
+- ✅ Response: `{"status": "success", "order_id": "10002"}`
+- ✅ Google Sheets: New row added with order details
+- ✅ IguanaX Logs: "High-value order detected: $350 - Sending SMS"
+- ✅ IguanaX Logs: "SMS sent successfully (MessageSID: SM...)"
+- ✅ Phone receives SMS: "Your order #10002 has been processed successfully! Total: $350.00"
+- ✅ Twilio Console: Message shows status "Delivered"
+
+<br>
+
+### Test 3: Invalid Data (Error Handling)
+
+**Test Case:** Malformed request - should return error without crashing
+
+```bash
+curl -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d @test-data/sample-order-invalid.json
+```
+
+**Expected Results:**
+- ✅ Response: `{"status": "error", "message": "Missing required fields"}`
+- ✅ IguanaX Logs: "Missing required fields in order data"
+- ❌ No Google Sheets entry
+- ❌ No SMS sent
+
+<br>
+---
+
+## 🎯 What we've accomplished
+
+**Multi-API Integration:**
+- ✅ Successfully integrated two different external APIs (Google Sheets + Twilio)
+- ✅ Handled different auth mechanisms (OAuth 2.0 vs HTTP Basic Auth)
+- ✅ Managed different data formats (JSON vs form-encoded)
+
+**Robust Error Handling:**
+- ✅ Retry logic with exponential backoff (1s, 2s, 4s)
+- ✅ SMS failure doesn't block order processing
+- ✅ Input validation
+- ✅ Protected calls (`pcall`) prevent crashes
+
+<br>
+
 ### Future Enhancements
 
 - Message queue for guaranteed delivery
 - HIPAA-compliant database for healthcare use
 - Monitoring and alerting
 - Rate limiting and circuit breaker
-- Unit test suite
+- Unit test

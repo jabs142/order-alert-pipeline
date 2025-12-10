@@ -1,9 +1,16 @@
 local utils = require('utils')
 local google_auth = require('google_auth')
 local google_sheets = require('google_sheets')
+local twilio_sms = require('twilio_sms')
 
 local CREDENTIALS = utils.loadCredentials('/Users/jabelle/Code/repos/order-alert-pipeline/credentials/order-alert-pipeline-97184e4676c4.json')
 local SPREADSHEET_ID = "1qHZNx5CfLI5c_e31OnvtVHgS_5RxUUbkO067x6ZvXdg"
+
+local TWILIO_CONFIG = {
+   accountSid = CREDENTIALS.twilio.account_sid,
+   authToken = CREDENTIALS.twilio.auth_token,
+   fromNumber = CREDENTIALS.twilio.from_number
+}
 
 local Server = net.http.listen{
    port = 8080,
@@ -76,10 +83,32 @@ function main(Data)
       iguana.logError('Failed to get access token')
    end
 
-   -- Step 6: Business logic - SMS alerts for high-value orders only (> $300)
-   -- TODO: Twilio SMS integration
+   -- Step 6: SMS alerts for high-value orders (> $300)
    if Order.total > 300 then
-      iguana.logInfo('High-value order - SMS alert pending Twilio integration')
+      iguana.logInfo('High-value order detected: $' .. Order.total .. ' - Sending SMS')
+
+      local messageText = string.format(
+         "Your order #%s has been processed successfully! Total: $%.2f",
+         Order.order_id,
+         Order.total
+      )
+
+      local smsSuccess, messageSid = twilio_sms.withRetry(
+         twilio_sms.sendSMS,
+         3,  -- Max 3 retries
+         TWILIO_CONFIG.accountSid,
+         TWILIO_CONFIG.authToken,
+         Order.customer.phone,
+         TWILIO_CONFIG.fromNumber,
+         messageText
+      )
+
+      if smsSuccess then
+         iguana.logInfo('SMS sent successfully (MessageSID: ' .. messageSid .. ')')
+      else
+         iguana.logError('Failed to send SMS after retries')
+         -- Note: Order still logged to Google Sheets, SMS failure doesn't block
+      end
    end
 
    -- Step 7: Always respond to client (even if Sheets logging failed)
