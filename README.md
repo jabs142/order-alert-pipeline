@@ -157,7 +157,6 @@ Keep everything ELI5, friendly, and very beginner-oriented."
 
 <br>
 <br>
----
 <br>
 
 ### B. How to integrate with Google Sheets API
@@ -192,12 +191,11 @@ Even though you don’t have a human user logging in, Google still needs a secur
 **Q: Why build JWT from scratch instead of using a library?**
 
 - IguanaX doesn't support popular JWT libraries (lua-resty-jwt requires OpenResty, luajwt needs C dependencies)
+<img width="732" height="494" alt="image" src="https://github.com/user-attachments/assets/8e7ccf69-3192-450a-b4f1-9a194e00d553" />
 
 
 <br>
 <br>
-
----
 <br>
 
 ### C. How to integrate with Twilio
@@ -335,9 +333,8 @@ Pharmacy system POSTs prescription data
 **Production Requirements:**
 - PHI encryption at rest (AES) and in transit (TLS) per HIPAA security requirements
 - Cross-pharmacy lookup to detect doctor shopping
-br>
 <br>
----
+<br>
 <br>
 
 ### Scenario 2: Lab Results Notification
@@ -433,8 +430,6 @@ Nurse scans barcode
 - Drug interaction checking
 <br>
 <br>
----
-<br>
 <br>
 
 ### Production Improvements for Healthcare
@@ -474,8 +469,6 @@ iguana.logInfo('SMS sent successfully (MessageSID: ' .. messageSid .. ')')
 ```
 
 <br>
-<br>
----
 <br>
 
 ### B. Lua Transformations & HTTP Calls
@@ -530,8 +523,6 @@ local row = {
 }
 ```
 <br>
-<br>
----
 <br>
 
 ### C. Using Iguana's Net Module for HTTP Requests
@@ -607,59 +598,6 @@ net.http.respond{
 
 ## 🧪 Testing
 
-<details>
-<summary><b>Test 1: Low-Value Order (Google Sheets Only)</b></summary>
-
-<br>
-
-**Test Case:** Order under $300 - should log to Sheets but not send SMS
-
-```bash
-curl -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d @test-data/sample-order-low.json
-```
-
-**Expected Results:**
-- ✅ Response: `{"status": "success", "order_id": "10001"}`
-- ✅ Google Sheets: New row added with order details
-- ✅ IguanaX Logs: "Order logged to Google Sheets"
-- ❌ No SMS sent (order total is $150)
-
-<br>
-
-<br>
-
-<details>
-<summary><b>Test 2: High-Value Order (Google Sheets + SMS)</b></summary>
-
-<br>
-
-**Test Case:** Order over $300 - should log to Sheets AND send SMS
-
-```bash
-curl -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d @test-data/sample-order-high.json
-```
-
-**Expected Results:**
-- ✅ Response: `{"status": "success", "order_id": "10002"}`
-- ✅ Google Sheets: New row added with order details
-- ✅ IguanaX Logs: "High-value order detected: $350 - Sending SMS"
-- ✅ IguanaX Logs: "SMS sent successfully (MessageSID: SM...)"
-- ✅ Phone receives SMS: "Your order #10002 has been processed successfully! Total: $350.00"
-- ✅ Twilio Console: Message shows status "Delivered"
-
-<br>
-
-<br>
-
-<details>
-<summary><b>Test 3: Invalid Data (Error Handling)</b></summary>
-
-<br>
-
 **Test Case:** Malformed request - should return error without crashing
 
 ```bash
@@ -676,11 +614,6 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-<details>
-<summary><b>📊 Results</b></summary>
-
-<br>
-
 **IguanaX Logs (Error Handling):**
 
 <img width="861" height="126" alt="image" src="https://github.com/user-attachments/assets/02f9dd94-a3b4-4b66-86e6-51f1b390966e" />
@@ -694,9 +627,6 @@ curl -X POST http://localhost:8080 \
 {"status": "error", "message": "Missing required fields"}%
 ```
 
-</details>
-
-</details>
 
 <br>
 <br>
