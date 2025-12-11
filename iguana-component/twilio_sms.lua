@@ -42,7 +42,6 @@ function TwilioSMS.sendSMS(accountSid, authToken, toNumber, fromNumber, messageB
     iguana.logInfo("Sending SMS to " .. toNumber)
 
     -- Make HTTP POST request
-    -- Note: Twilio returns multiple values like Google Sheets (body, code, headers)
     local success, body, statusCode, headers = pcall(net.http.post, {
         url = apiUrl,
         body = requestBody,

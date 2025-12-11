@@ -85,7 +85,7 @@ STEP 4: Cache Token for 55 Minutes
 
 ## JWT Deep Dive: The Three Parts
 
-### Part 1: Header
+### Part 1: Header - How is it signed? 
 ```json
 {
   "alg": "RS256",    ← Signing algorithm (RSA with SHA-256)
@@ -94,8 +94,8 @@ STEP 4: Cache Token for 55 Minutes
 ```
 
 **What is this?**
-- **JWT** = **J**SON **W**eb **T**oken - a standardized format for securely transmitting identity/claims
-- **RS256** = **R**SA encryption with **SHA-256** hashing - the specific cryptographic method used to create the signature
+- **JWT** = JSON Web Token - a standardized format for securely transmitting identity/claims
+- **RS256** = RSA encryption with **SHA-256** hashing - the specific cryptographic method used to create the signature
 
 **Purpose of the header:** Tells Google "this is a JWT" and "verify the signature using RS256"
 

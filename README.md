@@ -1,35 +1,75 @@
 # 📦 Order Alert Pipeline
 
-> **Project Goal:** Build an end-to-end integration using IguanaX to process order data and send intelligent notifications
+**Project Goal:**: Build an end-to-end integration using IguanaX to process order data and send intelligent notifications
 
 **Core Requirements:**
 - Ingest incoming JSON messages via HTTP
 - Process and filter the data
 - Send notifications via Twilio (SMS alerts) AND Google Sheets (data logging)
 
----
+**Output**
 
-## My Approach
+Test case: High-Value Order (Google Sheets + SMS)
 
-### 1. Understanding the Requirements
+**Test Case:** Order over $300 - should log to Sheets and send SMS
+
+```
+{
+  "order_id": "10002",
+  "customer": {
+    "name": "Jane Doe",
+    "phone": "+6597822466"
+  },
+  "total": 350.00
+}
+```
+
+
+Run
+```bash
+curl -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d @test-data/sample-order-high.json
+```
+
+Google Sheets ouput:
+
+
+
+Twilio SMS: 
+
+
+
+IguanaX Logs: 
+
+
+
+
+
+
+
+## How I approached the task
+
+## 1. Understanding the Requirements
 
 **Key Questions:**
 
 - **Why SMS only for orders >$300?**
-  High-value purchases need immediate attention, similar to critical lab values in healthcare
+  - High-value purchases need immediate attention, similar to critical lab values in healthcare
 
 - **Why both Google Sheets AND SMS?**
-  Different purposes - audit trail vs real-time alerting
+  - Different purposes - audit trail vs real-time alerting
 
 <br>
+<br>
+<br>
 
-### 2. Identifying Knowledge Gaps
+## 2. Identifying Knowledge Gaps
 
-#### What is IguanaX?
+### A. What is IguanaX?
 
-**Resources:** IguanaX Setup Guide & Lua in Iguana Translator documentation
-
-**Key Concepts:**
+**Learnings:**
+- Read IguanaX Setup Guide & Lua in Iguana Translator documentation
 - An integration platform that sits between systems to help them communicate
 - Component architecture: `Source → Translator → Destination`
   - **Source Components:** Receive data (HTTP listener, database reader, etc.)
@@ -61,47 +101,56 @@
 
 <br>
 
----
+<details>
+<summary>💡 <b>LLM Prompt Used for Learning</b></summary>
 
-> 💡 **LLM Prompt Used for Learning**
->
-> *"I'm a beginner and I want to learn about IguanaX. Cover the following clearly and simply, using analogies if helpful:*
->
-> 1. **What is IguanaX?**
->    - Explain what it does in very simple terms
->    - Describe the core idea or problem it solves
->
-> 2. **How does IguanaX work?**
->    - Give me a high-level mental model
->    - Don't assume I know anything beyond basic programming
->    - Use step-by-step breakdowns and examples
->
-> 3. **What would *I* actually use IguanaX for?**
->    - Include concrete examples (e.g., small tasks, real-world use cases)
->
-> 4. **What are common tools or frameworks that do similar things?**
->    - List at least 3 alternatives
->    - Explain how each compares in simple terms
->    - Tell me when I might choose them instead of IguanaX
->
-> 5. **Wrap up with a short summary of 'If you remember only 3 things about IguanaX, remember this…'"**
->
-> *Keep everything ELI5, friendly, and very beginner-oriented."*
+```
+"I'm a beginner and I want to learn about IguanaX. Cover the following clearly and simply, using analogies if helpful:
 
----
+1. What is IguanaX?
+   - Explain what it does in very simple terms
+   - Describe the core idea or problem it solves
 
-#### How to integrate with Google Sheets API
+2. How does IguanaX work?
+   - Give me a high-level mental model
+   - Don't assume I know anything beyond basic programming
+   - Use step-by-step breakdowns and examples
 
-**Learning Path:**
-- Understand OAuth flow
-- Research JWT structure
+3. What would *I* actually use IguanaX for?
+   - Include concrete examples (e.g., small tasks, real-world use cases)
+
+4. What are common tools or frameworks that do similar things?
+   - List at least 3 alternatives
+   - Explain how each compares in simple terms
+   - Tell me when I might choose them instead of IguanaX
+
+5. Wrap up with a short summary of 'If you remember only 3 things about IguanaX, remember this…'
+
+Keep everything ELI5, friendly, and very beginner-oriented."
+```
+
+</details>
+
+<br>
+<br>
+
+### B. How to integrate with Google Sheets API
+
+**Learnings:**
 - Read Google Sheets API Docs
+- Understand OAuth flow
+- Understand JWT structure
 
 <br>
 
 **Q: Why do we need OAuth if we already set up the service account?**
 
-Credentials are like an ID card, but you still need to exchange them for an access token
+Even though you don’t have a human user logging in, Google still needs a secure and standardized way to verify who is calling its APIs and what permissions they should have.
+
+1. Service account → creates and signs a JWT
+2. Sends JWT to Google’s OAuth endpoint
+3. OAuth endpoint → returns access token
+4. Access token → used to call the Sheets API
 
 <br>
 
@@ -111,14 +160,16 @@ Credentials are like an ID card, but you still need to exchange them for an acce
 <Insert picture here>
 
 <br>
+<br>
 
-#### How to integrate with Twilio
+### C. How to integrate with Twilio
 
-**Learning Path:**
+**Learnings:**
 - Read Twilio SMS API Docs
 - Understand HTTP Basic Authentication
 - Learn about form-encoded requests vs JSON
 
+<br>
 <br>
 
 **Q: How is Twilio different from Google Sheets authentication?**
@@ -154,6 +205,7 @@ Credentials are like an ID card, but you still need to exchange them for an acce
 ```
 
 <br>
+<br>
 
 **Q: Why does Twilio use URL encoding?**
 
@@ -170,6 +222,8 @@ JSON is easier to read and write
 JSON can represent complex nested data (like lists within lists)
 
 <br>
+<br>
+<br>
 
 ### 3. Implementation Decisions
 
@@ -182,8 +236,9 @@ JSON can represent complex nested data (like lists within lists)
 - Token caching (cache for 55 min, refresh 5 min early to avoid expiration)
 - Reduced API calls
 
-
----
+<br>
+<br>
+<br>
 
 ## 🏗️ Architecture
 
@@ -200,6 +255,8 @@ IguanaX Component (main.lua)
 ```
 
 <br>
+<br>
+<br>
 
 ### Component Breakdown
 
@@ -215,7 +272,9 @@ IguanaX Component (main.lua)
 6. Responds to the client with success/error status
 
 
----
+<br>
+<br>
+<br>
 
 ## 🏥 Real World Healthcare Applications
 
@@ -230,7 +289,10 @@ IguanaX Component (main.lua)
 
 ### Healthcare Adaptation Scenarios
 
-#### Scenario 1: Prescription Monitoring System
+<details>
+<summary><b>Scenario 1: Prescription Monitoring System</b></summary>
+
+<br>
 
 **Use Case:** Detect potential drug abuse through repeat prescription patterns
 
@@ -241,15 +303,11 @@ Pharmacy system POSTs prescription data
     → Alert pharmacist/prescriber if high-risk pattern detected
 ```
 
-<br>
-
 **Example Trigger Conditions:**
 - Patient fills same controlled substance (e.g., oxycodone, alprazolam) >3 times in 30 days
 - Multiple prescribers for same medication class
 - Early refills (>7 days before expected)
 - "Doctor shopping" across multiple pharmacies
-
-<br>
 
 **Sample Data Payload:**
 ```json
@@ -264,15 +322,16 @@ Pharmacy system POSTs prescription data
 }
 ```
 
-<br>
-
 **Production Requirements:**
 - PHI encryption at rest (AES) and in transit (TLS) per HIPAA security requirements
 - Cross-pharmacy lookup to detect doctor shopping
 
-<br>
+</details>
 
-#### Scenario 2: Lab Results Notification
+<details>
+<summary><b>Scenario 2: Lab Results Notification</b></summary>
+
+<br>
 
 **Use Case:** Critical lab values trigger immediate alerts
 
@@ -283,17 +342,18 @@ Lab system POSTs results
     → Alert physicians if critical
 ```
 
-<br>
-
 **Production Requirements:**
 - PHI encryption at rest and in transit
 - Audit logging for compliance
 - Patient consent checks
 - Integration with Epic/Cerner EHR systems
 
-<br>
+</details>
 
-#### Scenario 3: Medication Alert System
+<details>
+<summary><b>Scenario 3: Medication Alert System</b></summary>
+
+<br>
 
 **Use Case:** Prevent overdoses at point of administration
 
@@ -304,13 +364,13 @@ Nurse scans barcode
     → Alert if exceeds safe limit
 ```
 
-<br>
-
 **Production Requirements:**
 - EHR integration (Epic/Cerner)
 - Allergy checking against patient history
 - Override workflow for emergencies
 - Drug interaction checking
+
+</details>
 
 <br>
 
@@ -325,33 +385,173 @@ For healthcare deployment, would add:
 
 ---
 
-## 🔧 Technical Deep Dive
+## 🔧 Technical
 
-### Why No JWT Library?
+### Logging in IguanaX
 
-**Challenge:** IguanaX environment limitations
+**Automatic Timestamps:**
+
+IguanaX automatically adds timestamps to `iguana.logInfo()` and `iguana.logError()` calls. You don't need to manually add them to your log messages.
+
+**Example log output in IguanaX:**
+```
+2025-12-11 14:23:45 - INFO: Order #12345 received - Total: $350
+2025-12-11 14:23:46 - INFO: High-value order detected: $350 - Sending SMS
+2025-12-11 14:23:47 - INFO: SMS sent successfully (MessageSID: SM...)
+```
+
+**Code that generates these logs** (main.lua:62, 88, 107):
+```lua
+iguana.logInfo('Order #' .. Order.order_id .. ' received - Total: $' .. Order.total)
+iguana.logInfo('High-value order detected: $' .. Order.total .. ' - Sending SMS')
+iguana.logInfo('SMS sent successfully (MessageSID: ' .. messageSid .. ')')
+```
+
+<br>
+
+### Lua Transformations & HTTP Calls
+
+**Requirement:** Use Lua for data transformation and HTTP calls
+
+#### Data Transformation Example
+
+**BEFORE (Raw JSON string):**
+```json
+{
+  "order_id": "12345",
+  "customer": {
+    "name": "Jane Doe",
+    "phone": "+15551234567"
+  },
+  "total": 350.00
+}
+```
+
+**TRANSFORMATION #1: JSON → Lua Table** (main.lua:35)
+```lua
+-- Parse JSON string into Lua data structure
+local parseSuccess, Order = pcall(json.parse, {data=Request.body})
+
+-- Now Order is a Lua table:
+-- Order.order_id = "12345"
+-- Order.customer.name = "Jane Doe"
+-- Order.customer.phone = "+15551234567"
+-- Order.total = 350.00
+```
+
+**TRANSFORMATION #2: Lua Table → SMS Message String** (main.lua:90-94)
+```lua
+local messageText = string.format(
+    "Your order #%s has been processed successfully! Total: $%.2f",
+    Order.order_id,
+    Order.total
+)
+-- Result: "Your order #12345 has been processed successfully! Total: $350.00"
+```
+
+**TRANSFORMATION #3: Lua Table → Google Sheets Row** (google_sheets.lua:8-14)
+```lua
+-- Transform order data into spreadsheet row format
+local row = {
+    orderData.order_id,           -- "12345"
+    orderData.customer.name,      -- "Jane Doe"
+    orderData.customer.phone,     -- "+15551234567"
+    tostring(orderData.total),    -- "350.00"
+    timestamp                     -- "2025-12-11 14:23:45"
+}
+```
+<br>
+
+### Using Iguana's Net Module for HTTP Requests
+
+**Requirement:** Use Iguana's Net module (`net.http`) for HTTP requests
+
+#### Example 1: Google Sheets API Call (google_sheets.lua:26-34)
+
+```lua
+-- POST request to Google Sheets API
+local success, body, code, headers = pcall(net.http.post, {
+    url = apiUrl,
+    body = json.serialize{data=requestBody},
+    headers = {
+        ["Authorization"] = "Bearer " .. accessToken,
+        ["Content-Type"] = "application/json"
+    },
+    live = true  -- Required for external API calls
+})
+```
+
+**What this does:**
+- `net.http.post` is IguanaX's built-in HTTP client
+- Sends JSON data to Google Sheets API
+- Returns: `success` (boolean), `body` (response), `code` (HTTP status), `headers`
+
+<br>
+
+#### Example 2: Twilio SMS API Call (twilio_sms.lua:46-54)
+
+```lua
+-- POST request to Twilio API
+local success, body, statusCode, headers = pcall(net.http.post, {
+    url = apiUrl,
+    body = requestBody,  -- Form-encoded string
+    headers = {
+        ["Authorization"] = authHeader,  -- HTTP Basic Auth
+        ["Content-Type"] = "application/x-www-form-urlencoded"
+    },
+    live = true
+})
+```
+
+**What this does:**
+- Same `net.http.post` function, different data format
+- Sends form-encoded data (not JSON) to Twilio
+- Uses HTTP Basic Authentication (Base64-encoded credentials)
+
+<br>
+
+#### Example 3: Responding to HTTP Requests (main.lua:115-118)
+
+```lua
+-- Send HTTP response back to the client
+net.http.respond{
+    body='{\"status\": \"success\", \"order_id\": \"' .. Order.order_id .. '\"}',
+    entity_type='application/json'
+}
+```
+
+**What this does:**
+- `net.http.respond` sends the HTTP response back to the client
+- Returns JSON with order confirmation
+
+<br>
+
+### Why did I not use a JWT Library?
 
 **Why popular libraries won't work:**
 - `lua-resty-jwt` requires OpenResty (not compatible with IguanaX)
 - `luajwt` needs LuaCrypto and C dependencies (complex setup)
 - IguanaX doesn't have LuaRocks integration
 
-**Solution:** Built from scratch following RFC 7515
 
-**Benefits:**
-- Demonstrates deep understanding of OAuth 2.0 flow
+**Building a simple workaround:**
 - No external dependencies
 - Full control over implementation
 
 > **Note:** In production with Epic/ServiceNow, would use vendor-provided libraries
 
 <br>
+<br>
+<br>
 
----
+
 
 ## 🧪 Testing
 
-### Test 1: Low-Value Order (Google Sheets Only)
+<details>
+<summary><b>Test 1: Low-Value Order (Google Sheets Only)</b></summary>
+
+<br>
 
 **Test Case:** Order under $300 - should log to Sheets but not send SMS
 
@@ -369,7 +569,37 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-### Test 2: High-Value Order (Google Sheets + SMS)
+<details>
+<summary><b>📊 Results</b></summary>
+
+<br>
+
+**Google Sheets Output:**
+
+[Add screenshot here]
+
+<br>
+
+**IguanaX Logs:**
+
+[Add screenshot here]
+
+<br>
+
+**cURL Response:**
+
+[Add screenshot here]
+
+</details>
+
+</details>
+
+<br>
+
+<details>
+<summary><b>Test 2: High-Value Order (Google Sheets + SMS)</b></summary>
+
+<br>
 
 **Test Case:** Order over $300 - should log to Sheets AND send SMS
 
@@ -389,7 +619,43 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-### Test 3: Invalid Data (Error Handling)
+<details>
+<summary><b>📊 Results</b></summary>
+
+<br>
+
+**Google Sheets Output:**
+
+[Add screenshot here]
+
+<br>
+
+**Twilio SMS Delivery:**
+
+[Add screenshot here]
+
+<br>
+
+**IguanaX Logs:**
+
+[Add screenshot here]
+
+<br>
+
+**cURL Response:**
+
+[Add screenshot here]
+
+</details>
+
+</details>
+
+<br>
+
+<details>
+<summary><b>Test 3: Invalid Data (Error Handling)</b></summary>
+
+<br>
 
 **Test Case:** Malformed request - should return error without crashing
 
@@ -404,6 +670,27 @@ curl -X POST http://localhost:8080 \
 - ✅ IguanaX Logs: "Missing required fields in order data"
 - ❌ No Google Sheets entry
 - ❌ No SMS sent
+
+<br>
+
+<details>
+<summary><b>📊 Results</b></summary>
+
+<br>
+
+**IguanaX Logs (Error Handling):**
+
+[Add screenshot here]
+
+<br>
+
+**cURL Response:**
+
+[Add screenshot here]
+
+</details>
+
+</details>
 
 <br>
 ---
@@ -423,7 +710,7 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-### Future Enhancements
+## 🎯 Future Enhancements
 
 - Message queue for guaranteed delivery
 - HIPAA-compliant database for healthcare use
