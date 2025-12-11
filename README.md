@@ -1,11 +1,29 @@
-# 📦 Order Alert Pipeline
+# 📦 Order Alert Pipeline Using IguanaX with Google Sheets & Twilio Integrations 
+<br>
 
-**Project Goal:**: Build an end-to-end integration using IguanaX to process order data and send intelligent notifications
+## 🎯 Agenda:
+- Introduction (5 min)
+- Demo (5 min)
+- My approach to the task (15 min)
+- Learnings & Improvements (5 min)
+- QnA & Discussions 
+
+
+<br>
+<br>
+
+
+## Project Goal: Build an end-to-end integration using IguanaX to process order data and send intelligent notifications
+<br>
+<br>
 
 **Core Requirements:**
 - Ingest incoming JSON messages via HTTP
 - Process and filter the data
 - Send notifications via Twilio (SMS alerts) AND Google Sheets (data logging)
+
+<br>
+<br>
 
 **Output**
 
@@ -34,21 +52,27 @@ curl -X POST http://localhost:8080 \
 
 Google Sheets ouput:
 
+<img width="718" height="222" alt="image" src="https://github.com/user-attachments/assets/f9f1175d-26ee-4dc7-a886-137d2f7ee028" />
 
+<br>
+<br>
 
 Twilio SMS: 
 
+<img width="322" height="143" alt="image" src="https://github.com/user-attachments/assets/dd1a3d30-dc43-4cb4-9617-17ab23eb15aa" />
 
+<br>
+<br>
 
 IguanaX Logs: 
 
+<img width="860" height="806" alt="image" src="https://github.com/user-attachments/assets/5365f636-8d77-49ec-9654-20b1eb106f3e" />
 
+<br>
+<br>
+<br>
 
-
-
-
-
-## How I approached the task
+# How I approached the task
 
 ## 1. Understanding the Requirements
 
@@ -62,13 +86,11 @@ IguanaX Logs:
 
 <br>
 <br>
-<br>
 
 ## 2. Identifying Knowledge Gaps
 
 ### A. What is IguanaX?
 
-**Learnings:**
 - Read IguanaX Setup Guide & Lua in Iguana Translator documentation
 - An integration platform that sits between systems to help them communicate
 - Component architecture: `Source → Translator → Destination`
@@ -82,11 +104,12 @@ IguanaX Logs:
 
 **IguanaX and Healthcare:**
 
-- **Why use it over Python/JavaScript in healthcare?**
+- **Q: Why use it over Python/JavaScript in healthcare?**
   Built-in support for healthcare standards (HL7, FHIR), pre-built connectors, reliability features
+  Python/JavaScript are more flexible but require more effort to achieve the same level of reliability and monitoring for integration-heavy tasks.
 
-- **Is IguanaX only for healthcare?**
-  Primarily yes, but could be used for any system integration
+- **Q: Is IguanaX only for healthcare?**
+  It can be used for any system-to-system communication, data routing, and workflow automation. But it's used particularly with structured message standards like HL7 in healthcare.
 
 <br>
 
@@ -97,7 +120,8 @@ IguanaX Logs:
 <br>
 
 **What other technologies are there out there?**
-<Picture here>
+
+<img width="729" height="282" alt="image" src="https://github.com/user-attachments/assets/6acb6f40-9ea6-4e1d-98a4-fd2b4248ca9a" />
 
 <br>
 
@@ -156,10 +180,19 @@ Even though you don’t have a human user logging in, Google still needs a secur
 
 <br>
 
+**Q: Why Log to Google Sheets?**
+
+- **Audit trail:** Compliance for financial/clinical transactions
+- **Analytics:** Track trends and patterns
+- **Backup:** Redundancy if primary database fails
+- **Accessibility:** Non-technical staff can view in familiar interface
+
+<br>
+
 **Q: Why build JWT from scratch instead of using a library?**
 
 - IguanaX doesn't support popular JWT libraries (lua-resty-jwt requires OpenResty, luajwt needs C dependencies)
-<Insert picture here>
+
 
 <br>
 <br>
@@ -179,7 +212,8 @@ Even though you don’t have a human user logging in, Google still needs a secur
 
 **Q: How is Twilio different from Google Sheets authentication?**
 
-<Picture>
+<img width="660" height="618" alt="image" src="https://github.com/user-attachments/assets/1aa7d177-d91b-47be-86f9-ccc600d9b39f" />
+
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -230,21 +264,6 @@ JSON can represent complex nested data (like lists within lists)
 <br>
 <br>
 
-### 3. Implementation Decisions
-
-**Modular Design:**
-- Each file has one responsibility (separation of concerns)
-- Makes testing and debugging easier
-- Follows real-world software engineering best practices
-
-**Performance Optimization:**
-- Token caching (cache for 55 min, refresh 5 min early to avoid expiration)
-- Reduced API calls
-
-<br>
-<br>
-<br>
-
 ## 🏗️ Architecture
 
 ### Data Flow
@@ -252,20 +271,15 @@ JSON can represent complex nested data (like lists within lists)
 ```
 External System
     ↓ HTTP POST (JSON order data)
-IguanaX Component (main.lua)
-    ├─→ utils.lua: Load credentials
+IguanaX Component (main.lua) - Entry point that receives orders, validates them, logs everything to Google Sheets, and flags high-value orders for alerts
+    ├─→ utils.lua: Load Google service account credentials from JSON file
     ├─→ google_auth.lua: Get OAuth token
-    ├─→ google_sheets.lua: Log to spreadsheet ✅
-    └─→ twilio_sms.lua: Send SMS ✅
+    ├─→ google_sheets.lua: Log to google spreadsheet ✅
+    └─→ twilio_sms.lua: Send SMS with Twilio ✅
 ```
 
 <br>
 <br>
-<br>
-
-### Component Breakdown
-
-**main.lua** - Entry point that receives orders, validates them, logs everything to Google Sheets, and flags high-value orders for alerts
 
 **Process Flow:**
 
@@ -281,16 +295,11 @@ IguanaX Component (main.lua)
 <br>
 <br>
 
-## 🏥 Real World Healthcare Applications
 
-### Why Log to Google Sheets?
-
-- **Audit trail:** Compliance for financial/clinical transactions
-- **Analytics:** Track trends and patterns
-- **Backup:** Redundancy if primary database fails
-- **Accessibility:** Non-technical staff can view in familiar interface
+# 🏥 Real World Healthcare Applications
 
 <br>
+
 
 
 ### Scenario 1: Prescription Monitoring System
@@ -437,11 +446,14 @@ For healthcare deployment, would add:
 - **Scalability:** Connection pooling, rate limiting, load balancing, horizontal scaling
 - **Interoperability:** HL7 v2, FHIR, Epic, Cerner integration
 
----
+<br>
+<br>
+<br>
 
-## 🔧 Technical
 
-### A. Logging in IguanaX
+# 🔧 Technical
+
+## Logging in IguanaX
 
 **Automatic Timestamps:**
 
@@ -526,7 +538,7 @@ local row = {
 
 **Requirement:** Use Iguana's Net module (`net.http`) for HTTP requests
 
-#### Example 1: Google Sheets API Call (google_sheets.lua:26-34)
+### Example 1: Google Sheets API Call (google_sheets.lua:26-34)
 
 ```lua
 -- POST request to Google Sheets API
@@ -548,7 +560,7 @@ local success, body, code, headers = pcall(net.http.post, {
 
 <br>
 
-#### Example 2: Twilio SMS API Call (twilio_sms.lua:46-54)
+### Example 2: Twilio SMS API Call (twilio_sms.lua:46-54)
 
 ```lua
 -- POST request to Twilio API
@@ -570,7 +582,7 @@ local success, body, statusCode, headers = pcall(net.http.post, {
 
 <br>
 
-#### Example 3: Responding to HTTP Requests (main.lua:115-118)
+### Example 3: Responding to HTTP Requests (main.lua:115-118)
 
 ```lua
 -- Send HTTP response back to the client
@@ -616,31 +628,6 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-<details>
-<summary><b>📊 Results</b></summary>
-
-<br>
-
-**Google Sheets Output:**
-
-[Add screenshot here]
-
-<br>
-
-**IguanaX Logs:**
-
-[Add screenshot here]
-
-<br>
-
-**cURL Response:**
-
-[Add screenshot here]
-
-</details>
-
-</details>
-
 <br>
 
 <details>
@@ -665,37 +652,6 @@ curl -X POST http://localhost:8080 \
 - ✅ Twilio Console: Message shows status "Delivered"
 
 <br>
-
-<details>
-<summary><b>📊 Results</b></summary>
-
-<br>
-
-**Google Sheets Output:**
-
-[Add screenshot here]
-
-<br>
-
-**Twilio SMS Delivery:**
-
-[Add screenshot here]
-
-<br>
-
-**IguanaX Logs:**
-
-[Add screenshot here]
-
-<br>
-
-**cURL Response:**
-
-[Add screenshot here]
-
-</details>
-
-</details>
 
 <br>
 
@@ -727,20 +683,26 @@ curl -X POST http://localhost:8080 \
 
 **IguanaX Logs (Error Handling):**
 
-[Add screenshot here]
+<img width="861" height="126" alt="image" src="https://github.com/user-attachments/assets/02f9dd94-a3b4-4b66-86e6-51f1b390966e" />
+
 
 <br>
 
 **cURL Response:**
 
-[Add screenshot here]
+```
+{"status": "error", "message": "Missing required fields"}%
+```
 
 </details>
 
 </details>
 
 <br>
----
+<br>
+<br>
+<br>
+
 
 ## 🎯 What we've accomplished
 
@@ -749,12 +711,13 @@ curl -X POST http://localhost:8080 \
 - ✅ Handled different auth mechanisms (OAuth 2.0 vs HTTP Basic Auth)
 - ✅ Managed different data formats (JSON vs form-encoded)
 
-**Robust Error Handling:**
+**Error Handling:**
 - ✅ Retry logic with exponential backoff (1s, 2s, 4s)
 - ✅ SMS failure doesn't block order processing
-- ✅ Input validation
+- ✅ Input validation (Missing inputs, type check)
 - ✅ Protected calls (`pcall`) prevent crashes
 
+<br>
 <br>
 
 ## 🎯 Future Enhancements
@@ -764,3 +727,9 @@ curl -X POST http://localhost:8080 \
 - Monitoring and alerting
 - Rate limiting and circuit breaker
 - Unit test
+
+
+
+
+
+
