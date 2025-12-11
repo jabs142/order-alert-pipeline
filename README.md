@@ -133,6 +133,8 @@ Keep everything ELI5, friendly, and very beginner-oriented."
 
 <br>
 <br>
+---
+<br>
 
 ### B. How to integrate with Google Sheets API
 
@@ -160,6 +162,9 @@ Even though you don’t have a human user logging in, Google still needs a secur
 <Insert picture here>
 
 <br>
+<br>
+
+---
 <br>
 
 ### C. How to integrate with Twilio
@@ -287,12 +292,8 @@ IguanaX Component (main.lua)
 
 <br>
 
-### Healthcare Adaptation Scenarios
 
-<details>
-<summary><b>Scenario 1: Prescription Monitoring System</b></summary>
-
-<br>
+### Scenario 1: Prescription Monitoring System
 
 **Use Case:** Detect potential drug abuse through repeat prescription patterns
 
@@ -325,13 +326,12 @@ Pharmacy system POSTs prescription data
 **Production Requirements:**
 - PHI encryption at rest (AES) and in transit (TLS) per HIPAA security requirements
 - Cross-pharmacy lookup to detect doctor shopping
-
-</details>
-
-<details>
-<summary><b>Scenario 2: Lab Results Notification</b></summary>
-
+br>
 <br>
+---
+<br>
+
+### Scenario 2: Lab Results Notification
 
 **Use Case:** Critical lab values trigger immediate alerts
 
@@ -342,18 +342,40 @@ Lab system POSTs results
     → Alert physicians if critical
 ```
 
+**Example Trigger Conditions:**
+- Potassium >6.0 mEq/L (hyperkalemia - cardiac risk)
+- Glucose <50 mg/dL (severe hypoglycemia)
+- Troponin >0.4 ng/mL (possible heart attack)
+- INR >5.0 (high bleeding risk for patients on warfarin)
+- Creatinine increase >50% from baseline (acute kidney injury)
+
+**Sample Data Payload:**
+```json
+{
+  "patient_id": "P67890",
+  "patient_name": "Sarah Johnson",
+  "mrn": "MRN123456",
+  "test_name": "Potassium",
+  "result_value": 6.5,
+  "result_unit": "mEq/L",
+  "normal_range": "3.5-5.0",
+  "status": "critical",
+  "collection_time": "2025-12-11T14:30:00Z",
+  "result_time": "2025-12-11T15:45:00Z",
+  "ordering_physician": "DR-Smith-4521",
+  "location": "ICU-3-Bed-12"
+}
+```
+
 **Production Requirements:**
 - PHI encryption at rest and in transit
 - Audit logging for compliance
 - Patient consent checks
 - Integration with Epic/Cerner EHR systems
 
-</details>
-
-<details>
-<summary><b>Scenario 3: Medication Alert System</b></summary>
-
 <br>
+
+#### Scenario 3: Medication Alert System
 
 **Use Case:** Prevent overdoses at point of administration
 
@@ -364,14 +386,46 @@ Nurse scans barcode
     → Alert if exceeds safe limit
 ```
 
+**Example Trigger Conditions:**
+- Dose exceeds maximum daily limit (e.g., >4000mg acetaminophen/day)
+- Dose exceeds weight-based maximum (pediatric patients)
+- Medication on patient's allergy list
+- Drug-drug interaction detected (e.g., warfarin + aspirin)
+- Duplicate therapy (same drug class already administered)
+- Frequency violation (dose given too soon after previous dose)
+
+**Sample Data Payload:**
+```json
+{
+  "patient_id": "P24680",
+  "patient_name": "Michael Chen",
+  "mrn": "MRN789012",
+  "patient_weight_kg": 75,
+  "medication_name": "Morphine Sulfate",
+  "dose_amount": 15,
+  "dose_unit": "mg",
+  "route": "IV",
+  "scheduled_time": "2025-12-11T16:00:00Z",
+  "nurse_id": "RN-Williams-7834",
+  "barcode_scanned": "MED-MORPH-15MG-001234",
+  "location": "Med-Surg-2-Room-215",
+  "previous_doses_24h": [
+    {"time": "2025-12-11T12:00:00Z", "amount": 10, "unit": "mg"},
+    {"time": "2025-12-11T08:00:00Z", "amount": 10, "unit": "mg"}
+  ],
+  "patient_allergies": ["Codeine", "Penicillin"]
+}
+```
+
 **Production Requirements:**
 - EHR integration (Epic/Cerner)
 - Allergy checking against patient history
 - Override workflow for emergencies
 - Drug interaction checking
-
-</details>
-
+<br>
+<br>
+---
+<br>
 <br>
 
 ### Production Improvements for Healthcare
@@ -387,7 +441,7 @@ For healthcare deployment, would add:
 
 ## 🔧 Technical
 
-### Logging in IguanaX
+### A. Logging in IguanaX
 
 **Automatic Timestamps:**
 
@@ -408,8 +462,11 @@ iguana.logInfo('SMS sent successfully (MessageSID: ' .. messageSid .. ')')
 ```
 
 <br>
+<br>
+---
+<br>
 
-### Lua Transformations & HTTP Calls
+### B. Lua Transformations & HTTP Calls
 
 **Requirement:** Use Lua for data transformation and HTTP calls
 
@@ -461,8 +518,11 @@ local row = {
 }
 ```
 <br>
+<br>
+---
+<br>
 
-### Using Iguana's Net Module for HTTP Requests
+### C. Using Iguana's Net Module for HTTP Requests
 
 **Requirement:** Use Iguana's Net module (`net.http`) for HTTP requests
 
@@ -526,19 +586,6 @@ net.http.respond{
 
 <br>
 
-### Why did I not use a JWT Library?
-
-**Why popular libraries won't work:**
-- `lua-resty-jwt` requires OpenResty (not compatible with IguanaX)
-- `luajwt` needs LuaCrypto and C dependencies (complex setup)
-- IguanaX doesn't have LuaRocks integration
-
-
-**Building a simple workaround:**
-- No external dependencies
-- Full control over implementation
-
-> **Note:** In production with Epic/ServiceNow, would use vendor-provided libraries
 
 <br>
 <br>
