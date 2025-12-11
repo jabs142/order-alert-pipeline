@@ -34,13 +34,19 @@ curl -X POST http://localhost:8080 \
 
 Google Sheets ouput:
 
+<img width="718" height="222" alt="image" src="https://github.com/user-attachments/assets/f9f1175d-26ee-4dc7-a886-137d2f7ee028" />
 
 
 Twilio SMS: 
 
+<img width="322" height="143" alt="image" src="https://github.com/user-attachments/assets/dd1a3d30-dc43-4cb4-9617-17ab23eb15aa" />
 
 
 IguanaX Logs: 
+
+<img width="860" height="806" alt="image" src="https://github.com/user-attachments/assets/5365f636-8d77-49ec-9654-20b1eb106f3e" />
+
+
 
 
 
@@ -97,7 +103,8 @@ IguanaX Logs:
 <br>
 
 **What other technologies are there out there?**
-<Picture here>
+
+<img width="729" height="282" alt="image" src="https://github.com/user-attachments/assets/6acb6f40-9ea6-4e1d-98a4-fd2b4248ca9a" />
 
 <br>
 
@@ -157,7 +164,9 @@ Even though you don’t have a human user logging in, Google still needs a secur
 **Q: Why build JWT from scratch instead of using a library?**
 
 - IguanaX doesn't support popular JWT libraries (lua-resty-jwt requires OpenResty, luajwt needs C dependencies)
-<Insert picture here>
+  
+<img width="729" height="496" alt="image" src="https://github.com/user-attachments/assets/47d4aee3-1057-434e-8626-1567528f82ff" />
+
 
 <br>
 <br>
@@ -174,7 +183,8 @@ Even though you don’t have a human user logging in, Google still needs a secur
 
 **Q: How is Twilio different from Google Sheets authentication?**
 
-<Picture>
+<img width="723" height="680" alt="image" src="https://github.com/user-attachments/assets/4ae4dde6-5b30-4a52-9c86-015eb8464229" />
+
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -569,31 +579,6 @@ curl -X POST http://localhost:8080 \
 
 <br>
 
-<details>
-<summary><b>📊 Results</b></summary>
-
-<br>
-
-**Google Sheets Output:**
-
-[Add screenshot here]
-
-<br>
-
-**IguanaX Logs:**
-
-[Add screenshot here]
-
-<br>
-
-**cURL Response:**
-
-[Add screenshot here]
-
-</details>
-
-</details>
-
 <br>
 
 <details>
@@ -618,37 +603,6 @@ curl -X POST http://localhost:8080 \
 - ✅ Twilio Console: Message shows status "Delivered"
 
 <br>
-
-<details>
-<summary><b>📊 Results</b></summary>
-
-<br>
-
-**Google Sheets Output:**
-
-[Add screenshot here]
-
-<br>
-
-**Twilio SMS Delivery:**
-
-[Add screenshot here]
-
-<br>
-
-**IguanaX Logs:**
-
-[Add screenshot here]
-
-<br>
-
-**cURL Response:**
-
-[Add screenshot here]
-
-</details>
-
-</details>
 
 <br>
 
@@ -680,13 +634,16 @@ curl -X POST http://localhost:8080 \
 
 **IguanaX Logs (Error Handling):**
 
-[Add screenshot here]
+<img width="861" height="126" alt="image" src="https://github.com/user-attachments/assets/02f9dd94-a3b4-4b66-86e6-51f1b390966e" />
+
 
 <br>
 
 **cURL Response:**
 
-[Add screenshot here]
+```
+{"status": "error", "message": "Missing required fields"}%
+```
 
 </details>
 
