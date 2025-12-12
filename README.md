@@ -227,7 +227,6 @@ Even though you don’t have a human user logging in, Google still needs a secur
     └────┬────┘                         └────┬────┘
          │                                   │
          │ json.serialize()                  │ urlEncode()
-         │ does it for you                   │ you must do it
          │                                   │
          ▼                                   ▼
     {"message":                         Body=Hi+Jane%21+Order+
